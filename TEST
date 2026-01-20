@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ElyteSpark | Certificate Verification</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --red:#c4162a;
+  --border:#e6e6e6;
+  --text:#1a1a1a;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:Inter,system-ui,sans-serif;
+}
+
+body{
+  margin:0;
+  background:#ffffff;
+  color:var(--text);
+  overflow:hidden;
+}
+
+/* ===== CANVAS BACKGROUND ===== */
+canvas{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+}
+
+/* ===== LAYOUT ===== */
+.wrapper{
+  position:relative;
+  z-index:1;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+
+/* ===== CARD ===== */
+.card{
+  width:100%;
+  max-width:560px;
+  background:#ffffff;
+  border-radius:22px;
+  padding:38px;
+  box-shadow:
+    0 24px 48px rgba(0,0,0,.08),
+    0 0 0 1px var(--border);
+  animation:fadeUp .6s ease;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:none}
+}
+
+/* ===== BRAND ===== */
+.logo{
+  text-align:center;
+  margin-bottom:18px;
+}
+.logo img{
+  height:64px;
+  animation:float 6s ease-in-out infinite;
+}
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
+
+h1{
+  text-align:center;
+  font-size:26px;
+  margin:0;
+}
+.sub{
+  text-align:center;
+  font-size:14px;
+  color:#666;
+  margin:8px 0 28px;
+}
+
+/* ===== INPUT ===== */
+input{
+  width:100%;
+  padding:16px 18px;
+  border-radius:40px;
+  border:1px solid var(--border);
+  font-size:15px;
+  outline:none;
+}
+input:focus{
+  border-color:var(--red);
+}
+
+/* ===== BUTTON ===== */
+button{
+  width:100%;
+  margin-top:16px;
+  padding:16px;
+  border:none;
+  border-radius:40px;
+  font-size:15px;
+  font-weight:600;
+  color:#fff;
+  background:linear-gradient(135deg,#e01e37,#9b0f1f);
+  cursor:pointer;
+  transition:.25s;
+}
+button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 28px rgba(196,22,42,.45);
+}
+
+/* ===== RESULT ===== */
+.result{
+  margin-top:22px;
+  padding:22px;
+  border-radius:16px;
+  font-size:14px;
+  animation:slideUp .4s ease;
+}
+@keyframes slideUp{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:none}
+}
+.valid{
+  background:#f1fffb;
+  border-left:4px solid #1bbf8b;
+}
+.invalid{
+  background:#fff3f3;
+  border-left:4px solid #e63946;
+}
+
+/* ===== MESSAGE ===== */
+.message{
+  line-height:1.7;
+  color:#333;
+}
+.message b{
+  color:var(--red);
+}
+
+/* ===== PREVIEW ===== */
+.preview-box{
+  margin-top:24px;
+  border:2px solid var(--red);
+  border-radius:16px;
+  padding:12px;
+  background:#fff;
+}
+.preview-box iframe{
+  width:100%;
+  height:420px;
+  border:none;
+  border-radius:10px;
+}
+
+/* ===== FOOTER ===== */
+.footer{
+  margin-top:26px;
+  text-align:center;
+  font-size:12px;
+  color:#888;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="wrapper">
+  <div class="card">
+
+    <div class="logo">
+      <img src="logo.png" alt="ElyteSpark">
+    </div>
+
+    <h1>Certificate Verification</h1>
+    <p class="sub">Verify certificates issued by ElyteSpark</p>
+
+    <input id="certId" placeholder="Enter Certificate ID">
+    <button onclick="verify()">Verify Certificate</button>
+
+    <div id="result"></div>
+
+    <div class="footer">
+      © ElyteSpark • Secure Credential Validation
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ===== HIGH-RES TECH BACKGROUND ===== */
+const canvas=document.getElementById("bg");
+const ctx=canvas.getContext("2d");
+let DPR=window.devicePixelRatio||1;
+let w,h,nodes=[];
+const NODE_COUNT=160, CONNECT_DIST=180;
+
+function resize(){
+  w=innerWidth; h=innerHeight;
+  canvas.width=w*DPR; canvas.height=h*DPR;
+  canvas.style.width=w+"px"; canvas.style.height=h+"px";
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+
+  nodes=[...Array(NODE_COUNT)].map(()=>({
+    x:Math.random()*w,
+    y:Math.random()*h,
+    vx:(Math.random()-.5)*.4,
+    vy:(Math.random()-.5)*.4,
+    type:Math.random(),
+    pulse:Math.random()*Math.PI*2
+  }));
+}
+addEventListener("resize",resize);
+resize();
+
+function draw(){
+  ctx.clearRect(0,0,w,h);
+  for(let i=0;i<nodes.length;i++){
+    const a=nodes[i];
+    a.x+=a.vx; a.y+=a.vy; a.pulse+=.04;
+    if(a.x<0||a.x>w) a.vx*=-1;
+    if(a.y<0||a.y>h) a.vy*=-1;
+
+    ctx.fillStyle="#c4162a";
+    if(a.type<.55){
+      ctx.beginPath(); ctx.arc(a.x,a.y,2.4,0,Math.PI*2); ctx.fill();
+    }else if(a.type<.8){
+      ctx.fillRect(a.x-2,a.y-2,4,4);
+    }else{
+      const r=2.8+Math.sin(a.pulse)*.8;
+      ctx.beginPath(); ctx.arc(a.x,a.y,r,0,Math.PI*2); ctx.fill();
+    }
+
+    for(let j=i+1;j<nodes.length;j++){
+      const b=nodes[j];
+      const d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d<CONNECT_DIST){
+        ctx.strokeStyle=`rgba(196,22,42,${0.6-d/CONNECT_DIST})`;
+        ctx.lineWidth=1.2;
+        ctx.beginPath();
+        ctx.moveTo(a.x,a.y);
+        ctx.lineTo(b.x,b.y);
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* ===== VERIFICATION ===== */
+const API="PASTE_YOUR_GAS_URL_HERE";
+
+const p=new URLSearchParams(location.search);
+if(p.get("id")){
+  certId.value=p.get("id");
+  verify();
+}
+
+async function verify(){
+  const id=certId.value.trim().toUpperCase();
+  const box=document.getElementById("result");
+  box.innerHTML="Verifying…";
+
+  if(!/^[A-Z0-9\-]{6,30}$/.test(id)){
+    box.innerHTML="<div class='result invalid'>Invalid Certificate ID</div>";
+    return;
+  }
+
+  try{
+    const r=await fetch(`${API}?id=${id}&t=${Date.now()}`);
+    const d=await r.json();
+
+    if(d.valid){
+      box.innerHTML=`
+        <div class="result valid">
+          <div class="message">
+            <p>
+              We are delighted to congratulate <b>${d.name}</b> on successfully
+              completing the <b>${d.program}</b> at <b>ElyteSpark</b>.
+            </p>
+            <p>
+              From <b>${d.startDate}</b> to <b>${d.endDate}</b>, you demonstrated
+              dedication, consistency, and a strong commitment to professional growth.
+            </p>
+            <p>
+              This certificate represents your readiness to apply learned skills
+              in real-world environments. Welcome to the <b>ElyteSpark alumni community</b>.
+            </p>
+          </div>
+
+          <div class="preview-box">
+            <iframe src="${d.previewUrl}" allowfullscreen></iframe>
+          </div>
+        </div>`;
+    }else{
+      box.innerHTML="<div class='result invalid'>Certificate Not Found</div>";
+    }
+  }catch{
+    box.innerHTML="<div class='result invalid'>Verification Failed</div>";
+  }
+}
+</script>
+
+</body>
+</html>
