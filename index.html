@@ -10,7 +10,6 @@
 <style>
 :root{
   --red:#c4162a;
-  --light-red:rgba(196,22,42,.12);
   --border:#e6e6e6;
   --text:#1a1a1a;
 }
@@ -22,19 +21,20 @@
 
 body{
   margin:0;
-  background:#fff;
+  background:#ffffff;
   color:var(--text);
   overflow:hidden;
 }
 
-/* ===== Tech Background ===== */
+/* ===== CANVAS BACKGROUND ===== */
 canvas{
   position:fixed;
   inset:0;
   z-index:0;
+  pointer-events:none;
 }
 
-/* ===== Layout ===== */
+/* ===== LAYOUT ===== */
 .wrapper{
   position:relative;
   z-index:1;
@@ -45,15 +45,15 @@ canvas{
   padding:24px;
 }
 
-/* ===== Card ===== */
+/* ===== CARD ===== */
 .card{
   width:100%;
   max-width:520px;
-  background:#fff;
-  border-radius:20px;
-  padding:36px;
+  background:#ffffff;
+  border-radius:22px;
+  padding:38px;
   box-shadow:
-    0 20px 40px rgba(0,0,0,.08),
+    0 24px 48px rgba(0,0,0,.08),
     0 0 0 1px var(--border);
   animation:fadeUp .6s ease;
 }
@@ -63,7 +63,7 @@ canvas{
   to{opacity:1;transform:none}
 }
 
-/* ===== Branding ===== */
+/* ===== BRAND ===== */
 .logo{
   text-align:center;
   margin-bottom:18px;
@@ -89,7 +89,7 @@ h1{
   margin:8px 0 28px;
 }
 
-/* ===== Input ===== */
+/* ===== INPUT ===== */
 input{
   width:100%;
   padding:16px 18px;
@@ -100,10 +100,9 @@ input{
 }
 input:focus{
   border-color:var(--red);
-  box-shadow:0 0 0 3px var(--light-red);
 }
 
-/* ===== Button ===== */
+/* ===== BUTTON ===== */
 button{
   width:100%;
   margin-top:16px;
@@ -122,7 +121,7 @@ button:hover{
   box-shadow:0 12px 28px rgba(196,22,42,.45);
 }
 
-/* ===== Result ===== */
+/* ===== RESULT ===== */
 .result{
   margin-top:22px;
   padding:18px;
@@ -151,7 +150,7 @@ button:hover{
 }
 .result a:hover{text-decoration:underline}
 
-/* ===== Footer ===== */
+/* ===== FOOTER ===== */
 .footer{
   margin-top:24px;
   text-align:center;
@@ -188,67 +187,95 @@ button:hover{
 </div>
 
 <script>
-/* ===== STRONG RED TECH BACKGROUND (WHITE SAFE) ===== */
+/* ===== HIGH-RES, SHARP TECH NETWORK ===== */
 const canvas = document.getElementById("bg");
 const ctx = canvas.getContext("2d");
 
-let w, h, nodes = [];
+let DPR = window.devicePixelRatio || 1;
+let width, height;
+let nodes = [];
+
+const NODE_COUNT = 160;
+const CONNECT_DIST = 180;
 
 function resize(){
-  w = canvas.width = window.innerWidth;
-  h = canvas.height = window.innerHeight;
+  width = window.innerWidth;
+  height = window.innerHeight;
 
-  nodes = Array.from({length: 85}, () => ({
-    x: Math.random() * w,
-    y: Math.random() * h,
-    vx: (Math.random() - 0.5) * 0.35,
-    vy: (Math.random() - 0.5) * 0.35
+  canvas.width = width * DPR;
+  canvas.height = height * DPR;
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+
+  nodes = Array.from({length:NODE_COUNT},()=>({
+    x:Math.random()*width,
+    y:Math.random()*height,
+    vx:(Math.random()-.5)*0.4,
+    vy:(Math.random()-.5)*0.4,
+    type:Math.random(),
+    pulse:Math.random()*Math.PI*2
   }));
 }
-window.addEventListener("resize", resize);
+
+window.addEventListener("resize",resize);
 resize();
 
-function animate(){
-  ctx.clearRect(0, 0, w, h);
+function drawNode(n){
+  ctx.fillStyle="#c4162a";
 
-  nodes.forEach((a, i) => {
+  if(n.type < 0.55){
+    ctx.beginPath();
+    ctx.arc(n.x,n.y,2.4,0,Math.PI*2);
+    ctx.fill();
+  }else if(n.type < 0.8){
+    ctx.fillRect(n.x-2,n.y-2,4,4);
+  }else{
+    const r = 2.8 + Math.sin(n.pulse)*0.8;
+    ctx.beginPath();
+    ctx.arc(n.x,n.y,r,0,Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function animate(){
+  ctx.clearRect(0,0,width,height);
+
+  for(let i=0;i<nodes.length;i++){
+    const a = nodes[i];
     a.x += a.vx;
     a.y += a.vy;
+    a.pulse += 0.04;
 
-    if (a.x < 0 || a.x > w) a.vx *= -1;
-    if (a.y < 0 || a.y > h) a.vy *= -1;
+    if(a.x<0||a.x>width) a.vx*=-1;
+    if(a.y<0||a.y>height) a.vy*=-1;
 
-    /* STRONG RED DOTS */
-    ctx.fillStyle = "rgba(196,22,42,0.95)";
-    ctx.beginPath();
-    ctx.arc(a.x, a.y, 2.6, 0, Math.PI * 2);
-    ctx.fill();
+    drawNode(a);
 
-    /* STRONG RED LINES */
-    for (let j = i + 1; j < nodes.length; j++) {
+    for(let j=i+1;j<nodes.length;j++){
       const b = nodes[j];
-      const d = Math.hypot(a.x - b.x, a.y - b.y);
-
-      if (d < 150) {
-        ctx.strokeStyle = `rgba(196,22,42,${0.55 - (d / 150) * 0.55})`;
+      const d = Math.hypot(a.x-b.x,a.y-b.y);
+      if(d < CONNECT_DIST){
+        ctx.strokeStyle = `rgba(196,22,42,${0.6 - d/CONNECT_DIST})`;
         ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
+        ctx.moveTo(a.x,a.y);
+        ctx.lineTo(b.x,b.y);
         ctx.stroke();
       }
     }
-  });
-
+  }
   requestAnimationFrame(animate);
 }
+
 animate();
 
 /* ===== VERIFICATION LOGIC ===== */
 const API = "1cuS-wvbgVyQWXACjmhV2euHgzp4kF4GJBy67s_uSseU";
 
 const params = new URLSearchParams(location.search);
-if (params.get("id")) {
+if(params.get("id")){
   certId.value = params.get("id");
   verify();
 }
@@ -258,17 +285,17 @@ async function verify(){
   const box = document.getElementById("result");
   box.innerHTML = "Verifying…";
 
-  if (!/^[A-Z0-9\-]{6,30}$/.test(id)) {
-    box.innerHTML = "<div class='result invalid'>Invalid Certificate ID</div>";
+  if(!/^[A-Z0-9\-]{6,30}$/.test(id)){
+    box.innerHTML="<div class='result invalid'>Invalid Certificate ID</div>";
     return;
   }
 
-  try {
+  try{
     const res = await fetch(`${API}?id=${id}&t=${Date.now()}`);
     const data = await res.json();
 
-    if (data.valid) {
-      box.innerHTML = `
+    if(data.valid){
+      box.innerHTML=`
         <div class="result valid">
           <b>✔ Valid Certificate</b><br><br>
           <b>Name:</b> ${data.name}<br>
@@ -276,11 +303,11 @@ async function verify(){
           <b>Issued:</b> ${data.issueDate}<br>
           <a href="${data.viewUrl}" target="_blank">View Certificate →</a>
         </div>`;
-    } else {
-      box.innerHTML = "<div class='result invalid'>Certificate Not Found</div>";
+    }else{
+      box.innerHTML="<div class='result invalid'>Certificate Not Found</div>";
     }
-  } catch {
-    box.innerHTML = "<div class='result invalid'>Verification Failed</div>";
+  }catch{
+    box.innerHTML="<div class='result invalid'>Verification Failed</div>";
   }
 }
 </script>
