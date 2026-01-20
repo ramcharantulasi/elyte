@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ElyteSpark | Certificate Verification</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --red:#c4162a;
+  --light-red:rgba(196,22,42,.12);
+  --border:#e6e6e6;
+  --text:#1a1a1a;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:Inter,system-ui,sans-serif;
+}
+
+body{
+  margin:0;
+  background:#fff;
+  color:var(--text);
+  overflow:hidden;
+}
+
+/* ===== Tech Background ===== */
+canvas{
+  position:fixed;
+  inset:0;
+  z-index:0;
+}
+
+/* ===== Layout ===== */
+.wrapper{
+  position:relative;
+  z-index:1;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+
+/* ===== Card ===== */
+.card{
+  width:100%;
+  max-width:520px;
+  background:#fff;
+  border-radius:20px;
+  padding:36px;
+  box-shadow:
+    0 20px 40px rgba(0,0,0,.08),
+    0 0 0 1px var(--border);
+  animation:fadeUp .6s ease;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:none}
+}
+
+/* ===== Branding ===== */
+.logo{
+  text-align:center;
+  margin-bottom:18px;
+}
+.logo img{
+  height:64px;
+  animation:float 6s ease-in-out infinite;
+}
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
+
+h1{
+  text-align:center;
+  font-size:26px;
+  margin:0;
+}
+.sub{
+  text-align:center;
+  font-size:14px;
+  color:#666;
+  margin:8px 0 28px;
+}
+
+/* ===== Input ===== */
+input{
+  width:100%;
+  padding:16px 18px;
+  border-radius:40px;
+  border:1px solid var(--border);
+  font-size:15px;
+  outline:none;
+}
+input:focus{
+  border-color:var(--red);
+  box-shadow:0 0 0 3px var(--light-red);
+}
+
+/* ===== Button ===== */
+button{
+  width:100%;
+  margin-top:16px;
+  padding:16px;
+  border:none;
+  border-radius:40px;
+  font-size:15px;
+  font-weight:600;
+  color:#fff;
+  background:linear-gradient(135deg,#e01e37,#9b0f1f);
+  cursor:pointer;
+  transition:.25s;
+}
+button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 28px rgba(196,22,42,.45);
+}
+
+/* ===== Result ===== */
+.result{
+  margin-top:22px;
+  padding:18px;
+  border-radius:14px;
+  font-size:14px;
+  animation:slideUp .4s ease;
+}
+@keyframes slideUp{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:none}
+}
+.valid{
+  background:#f1fffb;
+  border-left:4px solid #1bbf8b;
+}
+.invalid{
+  background:#fff3f3;
+  border-left:4px solid #e63946;
+}
+.result a{
+  display:inline-block;
+  margin-top:10px;
+  font-weight:600;
+  color:var(--red);
+  text-decoration:none;
+}
+.result a:hover{text-decoration:underline}
+
+/* ===== Footer ===== */
+.footer{
+  margin-top:24px;
+  text-align:center;
+  font-size:12px;
+  color:#888;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="wrapper">
+  <div class="card">
+
+    <div class="logo">
+      <img src="logo.png" alt="ElyteSpark">
+    </div>
+
+    <h1>Certificate Verification</h1>
+    <p class="sub">Verify certificates issued by ElyteSpark</p>
+
+    <input id="certId" placeholder="Enter Certificate ID">
+    <button onclick="verify()">Verify Certificate</button>
+
+    <div id="result"></div>
+
+    <div class="footer">
+      © ElyteSpark • Secure Credential Validation
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ===== STRONG RED TECH BACKGROUND (WHITE SAFE) ===== */
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+
+let w, h, nodes = [];
+
+function resize(){
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+
+  nodes = Array.from({length: 85}, () => ({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    vx: (Math.random() - 0.5) * 0.35,
+    vy: (Math.random() - 0.5) * 0.35
+  }));
+}
+window.addEventListener("resize", resize);
+resize();
+
+function animate(){
+  ctx.clearRect(0, 0, w, h);
+
+  nodes.forEach((a, i) => {
+    a.x += a.vx;
+    a.y += a.vy;
+
+    if (a.x < 0 || a.x > w) a.vx *= -1;
+    if (a.y < 0 || a.y > h) a.vy *= -1;
+
+    /* STRONG RED DOTS */
+    ctx.fillStyle = "rgba(196,22,42,0.95)";
+    ctx.beginPath();
+    ctx.arc(a.x, a.y, 2.6, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* STRONG RED LINES */
+    for (let j = i + 1; j < nodes.length; j++) {
+      const b = nodes[j];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+
+      if (d < 150) {
+        ctx.strokeStyle = `rgba(196,22,42,${0.55 - (d / 150) * 0.55})`;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+    }
+  });
+
+  requestAnimationFrame(animate);
+}
+animate();
+
+/* ===== VERIFICATION LOGIC ===== */
+const API = "YOUR_GAS_WEBAPP_URL";
+
+const params = new URLSearchParams(location.search);
+if (params.get("id")) {
+  certId.value = params.get("id");
+  verify();
+}
+
+async function verify(){
+  const id = certId.value.trim().toUpperCase();
+  const box = document.getElementById("result");
+  box.innerHTML = "Verifying…";
+
+  if (!/^[A-Z0-9\-]{6,30}$/.test(id)) {
+    box.innerHTML = "<div class='result invalid'>Invalid Certificate ID</div>";
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}?id=${id}&t=${Date.now()}`);
+    const data = await res.json();
+
+    if (data.valid) {
+      box.innerHTML = `
+        <div class="result valid">
+          <b>✔ Valid Certificate</b><br><br>
+          <b>Name:</b> ${data.name}<br>
+          <b>Program:</b> ${data.course}<br>
+          <b>Issued:</b> ${data.issueDate}<br>
+          <a href="${data.viewUrl}" target="_blank">View Certificate →</a>
+        </div>`;
+    } else {
+      box.innerHTML = "<div class='result invalid'>Certificate Not Found</div>";
+    }
+  } catch {
+    box.innerHTML = "<div class='result invalid'>Verification Failed</div>";
+  }
+}
+</script>
+
+</body>
+</html>
