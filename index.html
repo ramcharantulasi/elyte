@@ -299,9 +299,10 @@ async function verify(){
         <div class="result valid">
           <b>✔ Valid Certificate</b><br><br>
           <b>Name:</b> ${data.name}<br>
-          <b>Program:</b> ${data.course}<br>
-          <b>Issued:</b> ${data.issueDate}<br>
-          <a href="${data.viewUrl}" target="_blank">View Certificate →</a>
+          <b>Program:</b> ${data.program}<br>
+         <b>Start Date:</b> ${data.startDate}<br>
+         <b>End Date:</b> ${data.endDate}<br>
+         <a href="${data.previewUrl}" target="_blank">View Certificate →</a>
         </div>`;
     }else{
       box.innerHTML="<div class='result invalid'>Certificate Not Found</div>";
