@@ -20,7 +20,7 @@
   font-family:Inter,system-ui,sans-serif;
 }
 
-/* ✅ SCROLL FIX */
+/* ===== PAGE ===== */
 body{
   margin:0;
   background:#ffffff;
@@ -29,7 +29,7 @@ body{
   overflow-y:auto;
 }
 
-/* ===== CANVAS BACKGROUND ===== */
+/* ===== BACKGROUND CANVAS ===== */
 canvas{
   position:fixed;
   inset:0;
@@ -43,7 +43,7 @@ canvas{
   z-index:1;
   min-height:100vh;
   display:flex;
-  align-items:flex-start;   /* ✅ allow vertical growth */
+  align-items:flex-start;
   justify-content:center;
   padding:48px 24px;
 }
@@ -58,12 +58,6 @@ canvas{
   box-shadow:
     0 24px 48px rgba(0,0,0,.08),
     0 0 0 1px var(--border);
-  animation:fadeUp .6s ease;
-}
-
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1;transform:none}
 }
 
 /* ===== BRAND ===== */
@@ -73,11 +67,6 @@ canvas{
 }
 .logo img{
   height:64px;
-  animation:float 6s ease-in-out infinite;
-}
-@keyframes float{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-6px)}
 }
 
 h1{
@@ -99,9 +88,9 @@ input{
   border-radius:40px;
   border:1px solid var(--border);
   font-size:15px;
-  outline:none;
 }
 input:focus{
+  outline:none;
   border-color:var(--red);
 }
 
@@ -117,7 +106,6 @@ button{
   color:#fff;
   background:linear-gradient(135deg,#e01e37,#9b0f1f);
   cursor:pointer;
-  transition:.25s;
 }
 button:hover{
   transform:translateY(-2px);
@@ -130,11 +118,6 @@ button:hover{
   padding:22px;
   border-radius:16px;
   font-size:14px;
-  animation:slideUp .4s ease;
-}
-@keyframes slideUp{
-  from{opacity:0;transform:translateY(8px)}
-  to{opacity:1;transform:none}
 }
 .valid{
   background:#f1fffb;
@@ -145,7 +128,7 @@ button:hover{
   border-left:4px solid #e63946;
 }
 
-/* ✅ VALID HEADER */
+/* ===== VALID HEADER ===== */
 .valid-title{
   font-size:16px;
   font-weight:700;
@@ -163,25 +146,35 @@ button:hover{
 /* ===== MESSAGE ===== */
 .message{
   line-height:1.7;
-  color:#333;
 }
 .message b{
   color:var(--red);
 }
 
-/* ===== PREVIEW ===== */
+/* ===== CERTIFICATE PREVIEW (A4 LANDSCAPE: 29.7 × 21 cm) ===== */
 .preview-box{
-  margin-top:24px;
+  margin-top:26px;
   border:2px solid var(--red);
-  border-radius:16px;
-  padding:12px;
+  border-radius:18px;
   background:#fff;
+  overflow:hidden;
+  box-shadow:
+    0 18px 36px rgba(0,0,0,.15),
+    inset 0 0 0 1px rgba(0,0,0,.04);
 }
-.preview-box iframe{
+
+.preview-ratio{
+  position:relative;
   width:100%;
-  height:420px;
+  padding-top:70.707%;
+}
+
+.preview-ratio iframe{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
   border:none;
-  border-radius:10px;
 }
 
 /* ===== FOOTER ===== */
@@ -234,9 +227,10 @@ function resize(){
   ctx.setTransform(DPR,0,0,DPR,0,0);
 
   nodes=[...Array(NODE_COUNT)].map(()=>({
-    x:Math.random()*w,y:Math.random()*h,
-    vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,
-    t:Math.random(),p:Math.random()*Math.PI*2
+    x:Math.random()*w,
+    y:Math.random()*h,
+    vx:(Math.random()-.5)*.4,
+    vy:(Math.random()-.5)*.4
   }));
 }
 addEventListener("resize",resize);
@@ -246,7 +240,7 @@ function draw(){
   ctx.clearRect(0,0,w,h);
   for(let i=0;i<nodes.length;i++){
     const a=nodes[i];
-    a.x+=a.vx; a.y+=a.vy; a.p+=.04;
+    a.x+=a.vx; a.y+=a.vy;
     if(a.x<0||a.x>w) a.vx*=-1;
     if(a.y<0||a.y>h) a.vy*=-1;
 
@@ -300,7 +294,8 @@ async function verify(){
           <div class="message">
             <p>
               We are delighted to congratulate <b>${d.name}</b> on successfully
-              completing the <b>${d.program}</b> at <b>ElyteSpark</b>.
+              completing the <b>${d.program}</b> training and internship at
+              <b>ElyteSpark</b>.
             </p>
             <p>
               From <b>${d.startDate}</b> to <b>${d.endDate}</b>, you demonstrated
@@ -314,7 +309,14 @@ async function verify(){
           </div>
 
           <div class="preview-box">
-            <iframe src="${d.previewUrl}" allowfullscreen></iframe>
+            <div class="preview-ratio">
+              <iframe
+                src="${d.previewUrl}"
+                sandbox="allow-scripts allow-same-origin"
+                referrerpolicy="no-referrer"
+                allowfullscreen>
+              </iframe>
+            </div>
           </div>
 
         </div>`;
@@ -329,3 +331,4 @@ async function verify(){
 
 </body>
 </html>
+
